@@ -1,0 +1,29 @@
+https://platform.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-latency
+
+# Reducing latency
+
+Latency is the time it takes for the model to process a prompt and generate an output. It is influenced by factors such as model size, prompt complexity, and infrastructure. It is better to first engineer a prompt that works well without constraints, then apply latency reduction afterward, so you do not miss what top performance looks like.
+
+## How to measure latency
+
+- Baseline latency: the time the model takes to process the prompt and generate the response, not counting input and output tokens per second. It gives a general idea of the model's speed.
+- Time to first token (TTFT): the time it takes to generate the first token of the response after the prompt was sent. This is particularly relevant when using streaming and you want a responsive experience.
+
+## How to reduce latency
+
+### 1. Choose the right model
+
+One of the most direct ways to reduce latency is to select the appropriate model for your use case. For speed-critical applications, Claude Haiku 4.5 offers the fastest response times while maintaining high intelligence. Consider your requirements and pick the model that best fits your needs in terms of speed and output quality.
+
+### 2. Optimize prompt and output length
+
+Minimize the number of tokens in both your input prompt and the expected output while maintaining high performance, because the fewer tokens the model processes and generates, the faster the response.
+
+- Be clear but concise: convey intent clearly and without unnecessary detail, while remembering Claude lacks context on your use case.
+- Ask for shorter responses: ask Claude directly to be concise. Because LLMs count tokens rather than words, asking for a paragraph or sentence count limit works better than a word count.
+- Set appropriate output limits: use the max_tokens parameter to cap response length. Note that reaching max_tokens cuts the response off, possibly mid-sentence, so it is a blunt tool best for short or multiple-choice answers.
+- Experiment with temperature: lower values (for example 0.2) can lead to more focused, shorter responses; higher values (for example 0.8) can produce more diverse but potentially longer outputs.
+
+### 3. Stream responses
+
+Streaming lets the model start sending back its response before the full output is complete, which significantly improves perceived responsiveness because users see output in real time. With streaming enabled, you can process output as it arrives and update your interface in parallel.

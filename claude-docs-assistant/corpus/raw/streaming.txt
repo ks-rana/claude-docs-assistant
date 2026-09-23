@@ -1,0 +1,24 @@
+https://platform.claude.com/en/docs/build-with-claude/streaming
+
+# Streaming messages
+
+When creating a Message, set "stream": true to incrementally stream the response using server-sent events (SSE). Streaming improves perceived responsiveness because the client can process output as it arrives.
+
+## Streaming with SDKs
+
+The Python and TypeScript SDKs offer multiple ways of streaming, including helpers such as messages.stream that accumulate events for you and expose a text stream. The Python SDK allows both sync and async streams. Using the SDK helpers is preferred over parsing raw events by hand.
+
+## Event types and order
+
+A streaming response is a sequence of server-sent events in this order:
+
+- message_start: contains a Message object with empty content.
+- A series of content blocks, each with: a content_block_start, one or more content_block_delta events, and a content_block_stop. Delta types include text_delta (streamed text), input_json_delta (streamed tool input JSON for a tool_use block), and thinking_delta (streamed thinking).
+- One or more message_delta events, which indicate top-level changes to the Message object, including the final usage on the last one.
+- A final message_stop event.
+
+Two other events can appear at any time: periodic ping events, and error events (for example an overloaded_error during high load). Clients should tolerate unknown event and delta types so they keep working as new types are added.
+
+## Handling events
+
+To reconstruct the full response, start from the message_start object and apply each delta to the content block at the given index, closing each block on content_block_stop. The SDK stream helpers do this accumulation automatically and also expose convenience events such as text.

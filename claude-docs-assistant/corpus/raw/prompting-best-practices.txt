@@ -1,0 +1,106 @@
+https://platform.claude.com/en/docs/build-with-claude/prompt-engineering/claude-prompting-best-practices
+
+# Prompting best practices
+
+The reference for prompt engineering with Claude's latest models. The techniques below under "General principles", "Output and formatting", "Thinking and reasoning", and "Chain complex prompts" apply to all current Claude models.
+
+## General principles
+
+### Be clear and direct
+
+Claude responds well to clear, explicit instructions. Being specific about your desired output helps results. If you want "above and beyond" behavior, explicitly request it rather than relying on the model to infer it from vague prompts.
+
+Think of Claude as a brilliant but new employee who lacks context on your norms and workflows. The more precisely you explain what you want, the better the result.
+
+Golden rule: show your prompt to a colleague with minimal context and ask them to follow it. If they would be confused, Claude will be too.
+
+- Be specific about the desired output format and constraints.
+- Provide instructions as sequential steps (numbered lists or bullets) when order or completeness matters.
+
+Example. Less effective: "Create an analytics dashboard." More effective: "Create an analytics dashboard. Include as many relevant features and interactions as possible. Go beyond the basics to create a fully-featured implementation."
+
+### Add context to improve performance
+
+Providing context or motivation behind your instructions, such as explaining why a behavior is important, helps Claude understand your goals and deliver more targeted responses. Claude is smart enough to generalize from the explanation.
+
+Example. Less effective: "NEVER use ellipses." More effective: "Your response will be read aloud by a text-to-speech engine, so never use ellipses since the engine will not know how to pronounce them."
+
+### Use examples effectively
+
+Examples (few-shot or multishot prompting) are one of the most reliable ways to steer Claude's output format, tone, and structure. Make examples relevant (mirror your actual use case), diverse (cover edge cases and vary enough that Claude does not pick up unintended patterns), and structured (wrap each example in <example> tags, multiple in <examples> tags, so Claude can distinguish them from instructions). Include 3 to 5 examples for best results. You can ask Claude to evaluate your examples for relevance and diversity or generate more.
+
+### Structure prompts with XML tags
+
+XML tags help Claude parse complex prompts unambiguously, especially when a prompt mixes instructions, context, examples, and variable inputs. Wrap each type of content in its own tag (for example <instructions>, <context>, <input>) to reduce misinterpretation. Use consistent, descriptive tag names. Nest tags when content has a natural hierarchy (documents inside <documents>, each inside <document index="n">).
+
+### Give Claude a role
+
+Setting a role in the system prompt focuses Claude's behavior and tone for your use case. Even a single sentence makes a difference. The role goes in the system parameter of the API call, for example a system prompt of "You are a helpful coding assistant specializing in Python." Role prompting is the most effective way to use system prompts.
+
+### Long context prompting
+
+When working with large documents or data-rich inputs (20k or more tokens), structure your prompt carefully:
+
+- Put longform data at the top: place long documents and inputs near the top of your prompt, above your query, instructions, and examples. Queries at the end can improve response quality by up to 30% in tests, especially with complex multi-document inputs.
+- Structure document content and metadata with XML tags: wrap each document in <document> tags with <document_content> and <source> subtags.
+- Ground responses in quotes: for long document tasks, ask Claude to quote relevant parts of the documents first before carrying out its task, which helps it cut through noise.
+
+## Output and formatting
+
+### Control the format of responses
+
+Effective ways to steer output formatting:
+
+1. Tell Claude what to do instead of what not to do. Instead of "Do not use markdown", try "Your response should be composed of smoothly flowing prose paragraphs."
+2. Use XML format indicators. For example, "Write the prose sections of your response in <smoothly_flowing_prose_paragraphs> tags."
+3. Match your prompt style to the desired output. The formatting style in your prompt may influence Claude's response style. Removing markdown from your prompt can reduce markdown in the output.
+4. Use detailed prompts for specific formatting preferences when you need more control over markdown and formatting usage.
+
+## Thinking and reasoning
+
+### Leverage thinking and chain-of-thought
+
+Claude's latest models offer thinking capabilities helpful for reflection after tool use or complex multi-step reasoning. Guidance:
+
+- Prefer general instructions over prescriptive steps. A prompt like "think thoroughly" often produces better reasoning than a hand-written step-by-step plan.
+- Multishot examples work with thinking: use <thinking> tags inside few-shot examples to show the reasoning pattern.
+- Manual chain-of-thought (CoT) prompting as a fallback: when thinking is off, encourage step-by-step reasoning by asking Claude to think through the problem. Use structured tags like <thinking> and <answer> to separate reasoning from the final output.
+- Ask Claude to self-check: append something like "Before you finish, verify your answer against [test criteria]." This catches errors reliably, especially for coding and math.
+
+## Chain complex prompts
+
+Explicit prompt chaining (breaking a task into sequential API calls) is useful when you need to inspect intermediate outputs or enforce a specific pipeline structure. The most common chaining pattern is self-correction: generate a draft, have Claude review it against criteria, then have Claude refine based on the review. Each step is a separate API call so you can log, evaluate, or branch at any point. Breaking complex tasks into smaller subtasks gives each subtask Claude's full attention and reduces errors.
+
+## Tool use
+
+### Tool usage
+
+Claude's latest models are trained for precise instruction following and benefit from explicit direction to use specific tools. If you say "can you suggest some changes," Claude will sometimes only provide suggestions rather than implementing them, even if making changes is what you intended. To make Claude take action, be more explicit, for example "Change this function to improve its performance" or "Make these edits to the authentication flow." You can add a system prompt instruction to implement changes rather than only suggesting them by default. If a model overtriggers tools, dial back aggressive language: instead of "CRITICAL: You MUST use this tool when...", use normal phrasing like "Use this tool when...".
+
+### Optimize parallel tool calling
+
+Claude's latest models run independent tool calls in parallel, such as multiple searches, reading several files at once, or parallel commands. This is steerable. To push parallel calling toward 100 percent, add a system prompt instructing Claude to make all independent tool calls simultaneously when there are no dependencies between them, and to call tools sequentially only when one depends on another's result, never using placeholders or guessing missing parameters. To reduce parallelism, instruct it to execute operations sequentially.
+
+## Agentic systems
+
+### Long-horizon reasoning and state tracking
+
+Claude's latest models handle long-horizon tasks with strong state tracking, maintaining orientation across extended sessions by making steady incremental progress rather than attempting everything at once. For tasks spanning multiple context windows: use a different prompt for the first window to set up a framework (write tests, setup scripts), then iterate on a todo list; have the model write tests in a structured format such as tests.json; set up quality-of-life scripts like init.sh; and consider starting a fresh context window rather than compacting, since the models are effective at discovering state from the filesystem and git. Use structured formats like JSON for state data, freeform text for progress notes, and git for checkpoints.
+
+### Subagent orchestration
+
+Claude's latest models orchestrate subagents natively, recognizing when a task benefits from delegating to specialized subagents. To take advantage, ensure well-defined subagent tools are available and let Claude orchestrate naturally without explicit instruction. Watch for overuse, since a model may spawn subagents where a simpler direct approach such as a single search would be faster. If you see excessive subagent use, add guidance: use subagents when tasks can run in parallel, need isolated context, or are independent workstreams; for simple, sequential, or single-file tasks, work directly.
+
+### Avoid over-engineering
+
+Claude may overengineer by creating extra files, adding unnecessary abstractions, or building flexibility that was not requested. To keep solutions minimal, instruct Claude to make only changes that are directly requested or clearly necessary: do not add features or refactor beyond scope, do not add docstrings or comments to unchanged code, do not add error handling for scenarios that cannot happen, and do not create abstractions for one-time operations. The right amount of complexity is the minimum needed for the current task.
+
+## Capability-specific tips
+
+### Vision capabilities
+
+Claude's latest models have strong vision capabilities for image processing and data extraction, especially when multiple images are present in context, and they can analyze videos by breaking them into frames. One effective technique is to give Claude a crop tool so it can zoom into relevant regions of an image, which has shown consistent uplift on image evaluations.
+
+### Frontend design
+
+Without guidance, models can default to generic patterns that create what users call an "AI slop" aesthetic. To get distinctive frontends, use a system prompt that tells Claude to avoid generic outputs and focus on distinctive typography (avoiding overused fonts like Arial and Inter), a cohesive color theme with dominant colors and sharp accents, purposeful motion reserved for high-impact moments, and backgrounds with atmosphere and depth. Explicitly avoid overused fonts, cliched color schemes such as purple gradients on white, predictable layouts, and cookie-cutter design.

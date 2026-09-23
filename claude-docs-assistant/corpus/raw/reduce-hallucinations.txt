@@ -1,0 +1,20 @@
+https://platform.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations
+
+# Reduce hallucinations
+
+Even advanced models like Claude can sometimes generate text that is factually incorrect or inconsistent with the given context. This is called hallucination. The techniques below minimize hallucinations and keep Claude's outputs accurate and trustworthy.
+
+## Basic hallucination minimization strategies
+
+- Allow Claude to say "I don't know": explicitly give Claude permission to admit uncertainty. This simple technique can drastically reduce false information. For example, instruct: "If you're unsure or if the report lacks necessary information, say 'I don't have enough information to confidently assess this.'"
+- Use direct quotes for factual grounding: for tasks involving long documents (over 20k tokens), ask Claude to extract word-for-word quotes first before performing its task. This grounds its responses in the actual text. For example: "Extract exact quotes from the policy most relevant to compliance. If you can't find relevant quotes, state 'No relevant quotes found.' Then base your analysis only on the extracted quotes."
+- Verify with citations: make Claude's response auditable by having it cite quotes and sources for each claim. You can also have Claude verify each claim by finding a supporting quote after it generates a response; if it can't find a quote, it must retract the claim. For example: "After drafting, review each claim. For each, find a direct quote from the documents that supports it. If you can't find a supporting quote, remove that claim."
+
+## Advanced techniques
+
+- Chain-of-thought verification: ask Claude to explain its reasoning step by step before giving a final answer. This can reveal faulty logic or assumptions.
+- Best-of-N verification: run Claude through the same prompt multiple times and compare outputs. Inconsistencies across outputs could indicate hallucinations.
+- Iterative refinement: use Claude's outputs as inputs for follow-up prompts, asking it to verify or expand on previous statements to catch and correct inconsistencies.
+- External knowledge restriction: explicitly instruct Claude to use only information from provided documents and not its general knowledge.
+
+Note: while these techniques significantly reduce hallucinations, they do not eliminate them entirely. Always validate critical information, especially for high-stakes decisions.

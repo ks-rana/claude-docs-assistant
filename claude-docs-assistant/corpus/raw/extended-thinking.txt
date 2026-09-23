@@ -1,0 +1,27 @@
+https://platform.claude.com/en/docs/build-with-claude/extended-thinking
+
+# Extended thinking
+
+Thinking lets Claude reason internally before it starts its final answer, which helps on complex, multi-step problems. There are two modes: manual extended thinking with a fixed budget, and adaptive thinking where the model decides.
+
+## Manual extended thinking (budget_tokens)
+
+Turn on manual mode with a thinking object: thinking: {type: "enabled", budget_tokens: N}. Claude thinks against that budget before answering. Manual mode is useful when you need predictable latency or precise control over thinking cost.
+
+Budget rules: budget_tokens must be at least 1,024 tokens (the API rejects smaller values) and must be less than max_tokens, because thinking tokens count toward the max_tokens limit for the turn (the exception is interleaved thinking, where the budget spans all thinking blocks in one turn). Because the budget must be less than max_tokens, extended thinking cannot be combined with max_tokens: 0 cache pre-warming. The budget is a target, not a strict cap; Claude may stop reasoning before the budget is exhausted, and max_tokens remains the hard ceiling.
+
+Tuning: for simple tasks start near the 1,024-token minimum and increase; for complex tasks start with 16,000 tokens or more. Higher budgets enable more thorough reasoning with diminishing returns and higher latency. For budgets above 32k, use batch processing to avoid networking timeouts.
+
+## Deprecation and adaptive thinking
+
+Manual extended thinking (type "enabled" with budget_tokens) is deprecated on the Claude 4.6 models (requests still succeed) and is not supported on Claude 4.7 and later models, which reject it with a 400 error. On Claude 4.5 and earlier models that support thinking, extended thinking is the only available mode.
+
+Adaptive thinking is the newer mode: set thinking: {type: "adaptive"} and control reasoning depth with output_config: {effort: ...} instead of a token budget. With a fixed budget Claude thinks on every request; with adaptive thinking Claude decides whether and how much to think on each request, and at lower effort it may skip thinking on easy inputs.
+
+## Migrating to adaptive thinking
+
+The mapping is small: remove budget_tokens, set thinking: {type: "adaptive"}, and use output_config: {effort: "high"} (high matches the API default). Switching modes is a thinking-configuration change, so the first request after the switch invalidates prompt cache breakpoints.
+
+## Tracking thinking cost
+
+Monitor usage.output_tokens_details.thinking_tokens in the response to see how many billed output tokens were internal reasoning. When streaming, this breakdown appears only on the final message_delta event.

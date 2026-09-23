@@ -1,0 +1,23 @@
+https://platform.claude.com/en/docs/build-with-claude/structured-outputs
+
+# Structured outputs
+
+Structured outputs constrain Claude's responses to follow a specific schema, ensuring valid, parseable output. There are two complementary capabilities: JSON outputs (output_config.format) get Claude's response in a specific JSON format, and strict tool use (strict: true) guarantees schema validation on tool names and inputs.
+
+## Why use structured outputs
+
+Without structured outputs, Claude can generate malformed JSON or invalid tool inputs. Structured outputs guarantee schema-compliant responses through constrained decoding: always valid (no JSON.parse errors), type safe (guaranteed field types and required fields), and reliable (no retries for schema violations).
+
+## JSON outputs
+
+To control Claude's response format, add an output_config.format parameter with type "json_schema" and your schema (standard JSON Schema). Claude's response is valid JSON matching the schema, returned in the text content block. SDKs provide helpers: Python client.messages.parse() accepts Pydantic models and returns parsed_output; the TypeScript SDK accepts Zod schemas.
+
+## JSON schema limitations
+
+Supported: basic types (object, array, string, integer, number, boolean, null), enum, const, anyOf, allOf, $ref/$def/definitions (external $ref not supported), string formats (date-time, time, date, duration, email, hostname, uri, ipv4, ipv6, uuid), and array minItems (only 0 and 1).
+
+Not supported: recursive schemas, complex types within enums, external $ref, numerical constraints (minimum, maximum, multipleOf), string constraints (minLength, maxLength), and array constraints beyond minItems. Python, TypeScript, Ruby, and PHP SDKs automatically transform schemas to remove unsupported constraints and validate responses against the original.
+
+## Grammar compilation and caching
+
+The first request has additional latency while the grammar compiles. Compiled grammars are cached for 24 hours. Changes to schema structure or the tool set invalidate the cache; name or description changes do not. Changing output_config.format invalidates the prompt cache for that conversation.

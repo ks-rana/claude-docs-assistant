@@ -1,0 +1,29 @@
+https://platform.claude.com/en/docs/build-with-claude/prompt-caching
+
+# Prompt caching
+
+Prompt caching optimizes API usage by letting you resume from specific prefixes in your prompts, significantly reducing processing time and cost for repetitive tasks or prompts with consistent elements.
+
+## How to enable prompt caching
+
+Two ways. Automatic caching (recommended for multi-turn conversations): add a single cache_control field at the top level of the request; the system applies the cache breakpoint to the last cacheable block and moves it forward as the conversation grows. Explicit cache breakpoints: place cache_control ({"type": "ephemeral"}) directly on individual content blocks for fine-grained control, with up to 4 explicit breakpoints for sections that change at different frequencies.
+
+## What can be cached
+
+Most request blocks can be cached: tool definitions in the tools array, content blocks in the system array, text messages, images and documents, and tool use and tool result blocks. Thinking blocks cannot be explicitly marked with cache_control (but are cached alongside other content in previous assistant turns), and empty text blocks cannot be cached.
+
+## Minimum token requirements
+
+The minimum cacheable prompt length varies by model, roughly from 512 tokens on the newest models up to 4,096 tokens on some models. Shorter prompts cannot be cached, though no error is returned; check the response usage fields to verify caching occurred.
+
+## Pricing and TTL
+
+The default cache lifetime (TTL) is 5 minutes, measured from request start and refreshed at no additional cost when reused. Cache writes cost more than base input tokens (about 1.25x for the 5-minute cache) and cache hits cost much less (about 0.1x base input). A 1-hour cache is available at additional cost via cache_control with "ttl": "1h".
+
+## What invalidates the cache
+
+Changes at each level invalidate that level and all subsequent levels. Changing tool definitions invalidates the tools, system, and messages caches. Changing the system prompt invalidates system and messages. Images, tool_choice, and thinking parameters affect the caches per the documented rules. Place cache_control on the last block whose prefix is identical across requests.
+
+## Tracking cache performance
+
+Monitor the usage fields in the response: cache_read_input_tokens (retrieved from cache), cache_creation_input_tokens (newly written to cache), and input_tokens (after the last breakpoint, not cache-eligible). Total input tokens = cache_read + cache_creation + input_tokens.

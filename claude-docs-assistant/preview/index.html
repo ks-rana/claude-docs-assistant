@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Claude Docs Assistant, local preview (MOCK_MODE)</title>
+<style>html,body{margin:0;padding:0}</style>
+</head>
+<body>
+<!--
+  Zero-cost local preview of src/app.jsx. It forces MOCK_MODE on, so the whole
+  UI renders and responds with NO API call. This is for QA only; the real
+  artifact runs on claude.ai. See preview/README.md to run it.
+-->
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
+<script>
+(async () => {
+  try {
+    let code = await (await fetch('../src/app.jsx?' + Date.now())).text();
+    code = code.replace(/import React[\s\S]*?from "react";/, '');
+    code = code.replace('export default function App', 'function App');
+    code = code.replace('MOCK_MODE: false', 'MOCK_MODE: true'); // preview only; src stays false
+    code = 'const {useState,useRef,useEffect,useMemo}=React;\n' + code + '\nwindow.__App=App;';
+    const out = Babel.transform(code, { presets: ['react'] }).code;
+    (0, eval)(out);
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(window.__App));
+  } catch (e) {
+    document.getElementById('root').innerHTML =
+      '<pre style="color:#ce2c31;padding:16px;font:13px monospace">' + (e && e.stack || e) + '</pre>';
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+https://platform.claude.com/en/docs/agents-and-tools/tool-use/overview
+
+# Tool use with Claude
+
+Tool use (also called function calling) lets Claude call functions that you define or that Anthropic provides. Claude determines when to call a tool based on the user's request and the tool's description, then returns a structured call that your application executes (client tools) or that Anthropic executes (server tools).
+
+## How tool use works
+
+Tools differ primarily by where the code executes. Client tools (your own tools, and Anthropic-schema tools such as bash and text_editor) run in your application: Claude responds with stop_reason "tool_use" and one or more tool_use blocks, your code executes the operation and sends back a tool_result. Server tools (such as web_search, web_fetch, and code_execution) run on Anthropic's infrastructure and return results directly.
+
+To have Claude call a function you define, pass a tool with a name, description, and input_schema. The round trip for a client tool: the first request defines the tool; Claude answers by returning a tool_use block naming the tool and its arguments; your code runs the operation; a second request sends the result back in a tool_result block (referencing the tool_use_id) so Claude can reply with the final answer.
+
+## When Claude uses tools
+
+With the default tool_choice of {"type": "auto"}, Claude determines on each turn whether to call a tool or respond directly. It calls a tool when the request maps to that tool's described capability and the answer is not already in context. This is steerable through the system prompt: a light instruction like "Use the tools to investigate before responding" increases tool use, while "Use your judgment about whether to call a tool" keeps it conservative. To require a tool call rather than rely on prompting, set tool_choice. Use disable_parallel_tool_use to ask for at most one tool call per turn. Add strict: true to a custom tool to guarantee its calls match your schema exactly.
+
+## Kinds of tools
+
+Your own tools: you write the schema and your application executes each call. Anthropic-schema client tools: Anthropic publishes the schema and trains Claude on it, but your application still executes the call (memory tool, bash tool, text editor tool, computer use tool, browser use tool). Server tools: run on Anthropic's infrastructure with no handler code in your application (web search, web fetch, code execution, tool search, MCP connector).
+
+## Pricing
+
+Tool use requests are priced on total input tokens (including the tools parameter), output tokens, and for server tools additional usage-based pricing (for example, web search charges per search). Using tools also adds a special system prompt that enables tool use, adding some tokens per request.

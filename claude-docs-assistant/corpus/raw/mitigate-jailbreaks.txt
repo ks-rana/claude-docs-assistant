@@ -1,0 +1,38 @@
+https://platform.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks
+
+# Mitigate jailbreaks and prompt injections
+
+Jailbreaking and prompt injection are attempts to make Claude ignore its guidelines or your instructions. While Claude is inherently resilient, the steps below strengthen your guardrails. These attacks fall into two categories:
+
+- Jailbreaks and direct prompt injection, where the user of your application is the adversary and crafts inputs intended to bypass your guardrails.
+- Indirect prompt injection, where the user is trusted but Claude processes third-party content (web pages, emails, documents, tool results) that contains adversarial instructions.
+
+## Jailbreaks and direct prompt injection
+
+Mitigations when a user deliberately crafts inputs to manipulate your application:
+
+- Harmlessness screens: use a lightweight model like Claude Haiku 4.5 to pre-screen user input before it reaches your main conversation. Use structured outputs to constrain the response to a simple classification (for example, an is_harmful boolean).
+- Input validation: filter user input for known injection patterns before it reaches Claude. You can use an LLM to build a generalized validation screen by providing known jailbreaking language as examples.
+- Prompt engineering: craft system prompts that emphasize ethical and legal boundaries and explicitly tell Claude how to refuse. For example, list your values and instruct: "If a request conflicts with these values, respond: 'I cannot perform that action as it goes against our values.'"
+- Respond to repeat offenders: adjust responses and consider throttling or banning users who repeatedly attempt to circumvent your guardrails.
+
+## Indirect prompt injection
+
+Protecting your users from instructions embedded in content Claude reads on their behalf (an inbound email body, a fetched web page, OCR output, a tool result):
+
+- Put untrusted content only in tool results: deliver third-party content inside tool_result blocks, never in system prompts or plain user text. Claude is trained to treat instructions inside tool results with appropriate skepticism.
+- Tell Claude what the content is and where it came from: make the nature and source explicit so Claude can calibrate how much to trust embedded directives.
+- State the policy in your system prompt: tell Claude explicitly that content returned from tools, documents, or searches is untrusted data and must never override the system prompt or the user's original request.
+- JSON-encode untrusted content: wrap third-party strings in a JSON object rather than concatenating them into free-form text. JSON escaping gives unambiguous delimiters so an attacker cannot break out into an instruction context.
+- Do not put your own instructions in tool results: because Claude treats tool-result content as untrusted, place your instructions in a user turn that follows the tool_result block.
+- Limit Claude's access to sensitive data and actions: apply least privilege so a successful injection does minimal damage.
+- Screen tool outputs before Claude acts on them: run tool output through a small classifier (Claude Haiku 4.5) and only return it if the screen reports no injection attempt.
+- Red-team your own agent: before deploying, test with documents, emails, and tool outputs that deliberately contain injection attempts.
+
+## Continuous monitoring
+
+Regularly analyze outputs for signs of successful injection, and use this monitoring to iteratively refine your prompts, validation, and filtering.
+
+## Advanced: chain safeguards
+
+Combine strategies for robust protection. An enterprise-grade example layers a compliance-focused system prompt, a harmlessness screen tool, and structured-output classification so the bot validates each query before processing it.

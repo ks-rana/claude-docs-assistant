@@ -1,0 +1,104 @@
+[
+  {
+    "id": "qa-hallucinations",
+    "question": "How do I stop Claude from making things up?",
+    "answer": "Give Claude explicit permission to say it does not know, which sharply reduces made-up answers [1]. For document tasks, have it pull exact quotes before answering and attach a supporting quote to each claim, dropping any claim it cannot support [1]. You can also restrict it to only the provided information and ask it to reason step by step to catch faulty logic [2].",
+    "sourceIds": ["gr-hallucination-basic", "gr-hallucination-advanced"]
+  },
+  {
+    "id": "qa-examples",
+    "question": "How many examples should I give for multishot prompting?",
+    "answer": "Include 3 to 5 examples for best results. Make them relevant so they mirror your real use case, diverse so they cover edge cases, and wrap each one in <example> tags so Claude can tell them apart from your instructions [1].",
+    "sourceIds": ["pe-examples"]
+  },
+  {
+    "id": "qa-indirect-injection",
+    "question": "What is indirect prompt injection?",
+    "answer": "Indirect prompt injection is when Claude processes third-party content, such as an inbound email, a fetched web page, or a tool result, that hides adversarial instructions [1]. Defend against it by putting untrusted content only in tool_result blocks, telling Claude that such content is untrusted data that must never override your instructions, and screening tool output before Claude acts on it [1].",
+    "sourceIds": ["gr-jailbreak-indirect"]
+  },
+  {
+    "id": "qa-latency",
+    "question": "How can I reduce my app's latency?",
+    "answer": "Choose a faster model such as Claude Haiku 4.5 for speed-critical work [1]. Keep prompts and outputs short and cap length with the max_tokens parameter [2]. Stream responses so users see output as it is generated rather than waiting for the whole answer [2].",
+    "sourceIds": ["gr-latency-model", "gr-latency-tokens"]
+  },
+  {
+    "id": "qa-consistency",
+    "question": "How do I get consistent JSON output from Claude?",
+    "answer": "Specify the exact format with JSON, XML, or a template, and give a filled-in example of the output you want [1]. For guaranteed JSON schema conformance, use the Structured Outputs feature instead of prompt engineering, since it enforces the schema [1].",
+    "sourceIds": ["gr-output-consistency"]
+  },
+  {
+    "id": "qa-tool-use",
+    "question": "How do I get Claude to make changes instead of just suggesting them?",
+    "answer": "Be explicit and use action verbs, for example 'Change this function to improve its performance' or 'Make these edits', rather than 'can you suggest some changes' [1]. You can also add a system prompt instruction telling Claude to implement changes by default rather than only suggesting them [1].",
+    "sourceIds": ["pe-tool-use"]
+  },
+  {
+    "id": "qa-long-context",
+    "question": "Where should I put a long document in my prompt?",
+    "answer": "Put long documents near the top of the prompt, above your question, instructions, and examples; placing the query at the end can improve response quality by up to 30 percent [1]. Wrap each document in XML tags and ask Claude to quote the relevant parts first so it cuts through the noise [1].",
+    "sourceIds": ["pe-long-context"]
+  },
+  {
+    "id": "qa-role",
+    "question": "How do I give Claude a role or persona?",
+    "answer": "Set the role in the system prompt; even a single sentence like 'You are a helpful coding assistant specializing in Python' focuses Claude's tone and expertise [1]. Because the system prompt applies across the whole conversation, the role keeps responses consistent in perspective without you restating the framing each turn [1].",
+    "sourceIds": ["pe-role"]
+  },
+  {
+    "id": "qa-keep-character",
+    "question": "How do I keep a chatbot in character?",
+    "answer": "Define the role and personality in the system prompt with detailed traits and background, and give the model a list of common scenarios with the expected responses so it stays in character even at edge cases [1].",
+    "sourceIds": ["gr-keep-character"]
+  },
+  {
+    "id": "qa-prompt-leak",
+    "question": "How do I stop my system prompt from leaking?",
+    "answer": "Use leak-resistant techniques only when necessary, since they add complexity. Separate context from queries in the system prompt, post-process outputs to filter for keywords that indicate a leak, avoid including unnecessary proprietary details, and audit your prompts and outputs regularly [1].",
+    "sourceIds": ["gr-prompt-leak"]
+  },
+  {
+    "id": "qa-xml-tags",
+    "question": "How do I use XML tags in prompts?",
+    "answer": "Wrap each kind of content in its own tag, such as <instructions>, <context>, and <input>, so Claude does not confuse one kind for another. Use consistent, descriptive tag names, and nest tags when the content has a natural hierarchy [1].",
+    "sourceIds": ["pe-xml-tags"]
+  },
+  {
+    "id": "qa-chain-of-thought",
+    "question": "Should I use chain of thought prompting?",
+    "answer": "For complex, multi-step reasoning, prefer a general instruction like 'think thoroughly' over a rigid hand-written step list, and use <thinking> and <answer> tags to separate the reasoning from the final output. Asking Claude to self-check before finishing reliably catches errors [1].",
+    "sourceIds": ["pe-chain-of-thought"]
+  },
+  {
+    "id": "qa-structured-outputs",
+    "question": "How do I get guaranteed valid JSON from Claude?",
+    "answer": "Use structured outputs: add an output_config.format parameter with type json_schema and your schema, and Claude returns valid JSON matching it through constrained decoding, so there are no JSON.parse errors and no retries for schema violations [1]. The SDKs add helpers, such as the Python client.messages.parse() with Pydantic models [1].",
+    "sourceIds": ["bc-structured-outputs"]
+  },
+  {
+    "id": "qa-tool-use-flow",
+    "question": "How does tool use work with Claude?",
+    "answer": "Define a tool with a name, description, and input_schema. Claude replies with stop_reason tool_use and a tool_use block naming the tool and its arguments; your code runs the operation and sends the outcome back in a tool_result block that references the tool_use_id, and Claude uses it to produce the answer [1]. Client tools run in your application, while server tools such as web search run on Anthropic's infrastructure [1].",
+    "sourceIds": ["bc-tool-use-flow"]
+  },
+  {
+    "id": "qa-prompt-caching",
+    "question": "What is prompt caching and how do I use it?",
+    "answer": "Prompt caching resumes from cached prefixes to cut cost and latency for repeated prompts. Enable it with a cache_control field, either automatically at the top level of the request or with explicit ephemeral breakpoints (up to 4) placed on stable content like system prompts and tool definitions at the start of the prompt [1]. The default cache lasts 5 minutes and refreshes for free when reused; a 1-hour cache is available at extra cost [1].",
+    "sourceIds": ["bc-prompt-caching"]
+  },
+  {
+    "id": "qa-thinking",
+    "question": "How do I control how much Claude thinks?",
+    "answer": "On newer models use adaptive thinking: set thinking to type adaptive and use output_config effort to control depth, and Claude decides whether and how much to think on each request [1]. Older models use manual extended thinking with thinking type enabled and a budget_tokens value (at least 1,024 and less than max_tokens); manual mode is deprecated on the 4.6 models and rejected with a 400 error on 4.7 and later [2].",
+    "sourceIds": ["bc-thinking-adaptive", "bc-thinking-manual"]
+  },
+  {
+    "id": "qa-streaming",
+    "question": "How do I stream responses from Claude?",
+    "answer": "Set stream to true when creating a message to receive it incrementally as server-sent events, which improves perceived responsiveness [1]. The events arrive in order: message_start, then for each content block a content_block_start, one or more content_block_delta events (text_delta, input_json_delta, thinking_delta), and content_block_stop, followed by message_delta and message_stop [2]. SDK helpers like messages.stream accumulate the events for you [1].",
+    "sourceIds": ["bc-streaming", "bc-streaming-events"]
+  }
+]

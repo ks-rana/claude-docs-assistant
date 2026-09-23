@@ -1,0 +1,18 @@
+https://platform.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-prompt-leak
+
+# Reduce prompt leak
+
+Prompt leaks can expose sensitive information you expect to be hidden in your prompt. While no method is foolproof, the strategies below can significantly reduce the risk.
+
+## Before you try to reduce prompt leak
+
+Consider leak-resistant prompt engineering only when absolutely necessary. Attempts to leak-proof your prompt add complexity that may degrade performance in other parts of the task. Test thoroughly to ensure the added complexity does not hurt output quality. Try monitoring techniques first, like output screening and post-processing, to catch instances of prompt leak.
+
+## Strategies to reduce prompt leak
+
+- Separate context from queries: use system prompts to isolate key information and context from user queries. On models that support prefill, you can emphasize key instructions in the user turn and reemphasize by prefilling the assistant turn. Prefilling is not supported on Claude Fable 5, Claude Mythos 5, Claude Opus 4.8, Claude Opus 4.7, Claude Opus 4.6, and Claude Sonnet 4.6.
+- Use post-processing: filter Claude's outputs for keywords that might indicate a leak, using regular expressions, keyword filtering, or a prompted LLM for more nuanced leaks.
+- Avoid unnecessary proprietary details: if Claude does not need it to perform the task, do not include it. Extra content distracts Claude from focusing on no-leak instructions.
+- Regular audits: periodically review your prompts and Claude's outputs for potential leaks.
+
+The goal is not just to prevent leaks but to maintain Claude's performance. Overly complex leak-prevention can degrade results. Balance is key.

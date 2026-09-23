@@ -1,0 +1,30 @@
+https://platform.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/increase-consistency
+
+# Increase output consistency
+
+Note: for guaranteed JSON schema conformance, use Structured Outputs instead of the prompt engineering techniques below. The techniques here are useful for general output consistency or when you need flexibility beyond strict JSON schemas.
+
+How to make Claude's responses more consistent:
+
+## Specify the desired output format
+
+Precisely define your desired output format using JSON, XML, or custom templates so Claude understands every output formatting element you require. For example, instruct Claude to output analysis in JSON with specific keys such as "sentiment", "key_issues" (a list), and "action_items".
+
+## Constrain with examples
+
+Provide examples of your desired output. This trains Claude's understanding better than abstract instructions. For example, give a filled-in template competitor profile, then ask Claude to analyze new competitors using that exact format.
+
+## Use retrieval for contextual consistency
+
+For tasks requiring consistent context (chatbots, knowledge bases), use retrieval to ground Claude's responses in a fixed information set. Provide the knowledge base entries, instruct Claude to always check the knowledge base first, and respond in a fixed format that names the knowledge base entry used.
+
+## Chain prompts for complex tasks
+
+Break down complex tasks into smaller, consistent subtasks. Each subtask gets Claude's full attention, reducing inconsistency errors across scaled workflows.
+
+## Keep Claude in character
+
+For role-based applications, maintaining consistent character requires deliberate prompting.
+
+- Use system prompts to set the role: define Claude's role and personality in the system prompt. This sets a strong foundation for consistent responses. When setting up the character, provide detailed information about the personality, background, and any specific traits or quirks so the model can emulate and generalize the character.
+- Prepare Claude for possible scenarios: provide a list of common scenarios and expected responses in your prompts. This trains Claude to handle diverse situations without breaking character. For example, an enterprise chatbot system prompt can specify exact responses for edge cases such as being asked about confidential information or unclear documents.
