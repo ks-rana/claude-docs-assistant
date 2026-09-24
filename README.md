@@ -4,7 +4,7 @@ A retrieval-augmented generation (RAG) chatbot that answers questions about the 
 
 The design goal is verifiability over coverage: rather than trusting a model's memory of the docs, this tool retrieves real documentation content, shows exactly which sources it used, and refuses to answer beyond them.
 
-**[▶ Live demo](REPLACE-WITH-YOUR-PUBLISHED-LINK)** · Independent educational project, not affiliated with or endorsed by Anthropic.
+Independent educational project, not affiliated with or endorsed by Anthropic.
 
 ## Run it
 
