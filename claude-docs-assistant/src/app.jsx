@@ -448,7 +448,21 @@ export default function App() {
     if (!q || loading) return; // FR-6.3 empty ignored, FR-6.4 no double send
     setInput("");
     setPendingRetry(null);
-    const history = messages.map((m) => ({ role: m.role, content: m.content }));
+    // Build API history from prior turns, keeping only assistant turns that
+    // have real text content (cached or generated). Out-of-scope and error
+    // turns carry no content and the Messages API rejects empty messages, so
+    // drop each such turn and the user question it answered, preserving valid
+    // user/assistant alternation (FR-4.3, FR-6.5).
+    const history = [];
+    for (const m of messages) {
+      if (m.role === "user") {
+        history.push({ role: "user", content: m.content });
+      } else if (typeof m.content === "string" && m.content.trim() !== "") {
+        history.push({ role: "assistant", content: m.content });
+      } else if (history.length && history[history.length - 1].role === "user") {
+        history.pop();
+      }
+    }
     setMessages((prev) => [...prev, { role: "user", content: q }]);
 
     const results = retrieve(q);
@@ -585,7 +599,7 @@ export default function App() {
             <div style={{ marginTop: 28 }}>
               <h2 style={{ margin: "0 0 8px", font: `600 24px/1.3 ${FONT_DISPLAY}`, color: T.ink }}>{greeting}</h2>
               <p style={{ font: `14.5px/1.6 ${FONT_BODY}`, color: T.inkSoft, maxWidth: 560, margin: "0 0 18px" }}>
-                Ask anything covered by the loaded docs on prompt engineering and guardrails. When a question is outside them, this tool says so and points you to the closest section.
+                Ask anything covered by the loaded docs on prompt engineering, guardrails, and core build-with-Claude features like tool use, structured outputs, prompt caching, thinking, and streaming. When a question is outside them, this tool says so and points you to the closest section.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {CONFIG.EXAMPLE_QUESTIONS.map((q) => (
